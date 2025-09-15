@@ -1,5 +1,7 @@
 from rest_framework_nested import routers
 from .views import BrandViewSet, OrderViewSet, ConfirmationViewSet
+from django.urls import path
+from . import views
 
 router = routers.SimpleRouter()
 router.register('brands', BrandViewSet, basename="brand")
@@ -10,4 +12,8 @@ router.register('confirmations', ConfirmationViewSet, basename="confirmation")
 brands_router = routers.NestedDefaultRouter(router, 'brands', lookup='brand')
 brands_router.register('orders', OrderViewSet, basename='brand-orders')
 
-urlpatterns = router.urls + brands_router.urls 
+urlpatterns = [
+    path('webhook/', views.webhook, name='webhook'),
+]
+
+urlpatterns += router.urls + brands_router.urls 

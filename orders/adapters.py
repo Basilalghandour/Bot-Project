@@ -1,5 +1,5 @@
-# orders/adapters.py
 from decimal import Decimal, InvalidOperation
+from .models import Customer
 
 
 def _to_decimal(value, default=Decimal("0.00")):
@@ -9,24 +9,43 @@ def _to_decimal(value, default=Decimal("0.00")):
     if isinstance(value, Decimal):
         return value
     try:
-        # sometimes price comes as "120.00" or 120
         return Decimal(str(value))
     except (InvalidOperation, ValueError, TypeError):
         return default
 
 
 def adapt_shopify_order(data, brand=None):
-    """
-    Convert a Shopify order payload into your internal OrderSerializer format.
-    Returns dict: { customer_name, customer_phone, items: [{product_name, quantity, price}, ...], optional external_id }
-    """
-    customer = data.get("customer", {}) or {}
-    # Shopify sometimes has phone at top-level too
-    phone = customer.get("phone") or data.get("phone") or ""
-    customer_name = " ".join(
-        filter(None, [customer.get("first_name"), customer.get("last_name")])
-    ).strip() or data.get("customer_name") or ""
+    """Convert Shopify order payload into Order + Customer info (persist + dict)."""
+    customer_data = data.get("customer", {}) or {}
+    billing_address = data.get("billing_address", {}) or {}
 
+    first_name = customer_data.get("first_name") or billing_address.get("first_name") or ""
+    last_name = customer_data.get("last_name") or billing_address.get("last_name") or ""
+    email = customer_data.get("email") or billing_address.get("email") or ""
+    phone = customer_data.get("phone") or billing_address.get("phone") or ""
+
+    address = billing_address.get("address1") or ""
+    city = billing_address.get("city") or ""
+    state = billing_address.get("province") or ""
+    country = billing_address.get("country") or ""
+    postal_code = billing_address.get("zip") or None
+
+    # Save / update customer in DB
+    Customer.objects.update_or_create(
+        email=email,
+        defaults={
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone": phone,
+            "address": address,
+            "city": city,
+            "state": state,
+            "country": country,
+            "postal_code": postal_code,
+        }
+    )
+
+    # Still return dict so your serializers don’t break
     items = []
     for li in data.get("line_items", []) or []:
         qty = li.get("quantity") or li.get("qty") or 1
@@ -38,84 +57,81 @@ def adapt_shopify_order(data, brand=None):
         })
 
     adapted = {
-        "customer_name": customer_name,
-        "customer_phone": phone,
+        "customer": {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "phone": phone,
+            "address": address,
+            "city": city,
+            "state": state,
+            "country": country,
+            "postal_code": postal_code,
+        },
         "items": items,
     }
-    # keep external id for debugging/reconciliation
+
     if "id" in data:
         adapted["external_id"] = str(data.get("id"))
+
     return adapted
 
 
 def adapt_woocommerce_order(data, brand=None):
-    """
-    Convert a WooCommerce order payload into your internal OrderSerializer format.
-    WooCommerce uses 'billing' and 'line_items'.
-    """
+    """Convert WooCommerce order payload into Order + Customer info."""
     billing = data.get("billing", {}) or {}
-    phone = billing.get("phone") or data.get("customer_phone") or ""
-    customer_name = " ".join(
-        filter(None, [billing.get("first_name"), billing.get("last_name")])
-    ).strip() or data.get("customer_name") or ""
+
+    first_name = billing.get("first_name") or ""
+    last_name = billing.get("last_name") or ""
+    email = billing.get("email") or ""
+    phone = billing.get("phone") or ""
+    address = billing.get("address_1") or ""
+    city = billing.get("city") or ""
+    state = billing.get("state") or ""
+    country = billing.get("country") or ""
+    postal_code = billing.get("postcode") or None
 
     items = []
     for li in data.get("line_items", []) or []:
         qty = li.get("quantity") or li.get("qty") or 1
-        price = li.get("total") or li.get("subtotal") or li.get("price") or 0
+        # --- CHANGE THIS LINE ---
+        # WooCommerce gives "total" (line total) and "price"/"subtotal" can vary.
+        # So calculate unit price safely:
+        total = _to_decimal(li.get("total") or 0)
+        unit_price = (total / qty) if qty else total
+        # ------------------------
         items.append({
             "product_name": li.get("name") or li.get("title") or "item",
             "quantity": int(qty),
-            "price": str(_to_decimal(price)),
+            "price": str(unit_price),  # save unit price instead of total
         })
 
     adapted = {
-        "customer_name": customer_name,
-        "customer_phone": phone,
+        "customer": {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "phone": phone,
+            "address": address,
+            "city": city,
+            "state": state,
+            "country": country,
+            "postal_code": postal_code,
+        },
         "items": items,
     }
+
     if "id" in data:
         adapted["external_id"] = str(data.get("id"))
+
     return adapted
-
-
-def adapt_generic_shop_order(data, brand=None):
-    """
-    Best-effort fallback: try to map common keys.
-    """
-    # direct expected structure?
-    if "customer_name" in data and "items" in data:
-        # ensure items have the right keys
-        nice_items = []
-        for it in data.get("items", []):
-            qty = it.get("quantity", it.get("qty", 1))
-            price = it.get("price", 0)
-            nice_items.append({
-                "product_name": it.get("product_name") or it.get("name") or "item",
-                "quantity": int(qty),
-                "price": str(_to_decimal(price)),
-            })
-        return {
-            "customer_name": data.get("customer_name"),
-            "customer_phone": data.get("customer_phone", ""),
-            "items": nice_items,
-            "external_id": str(data.get("external_id")) if data.get("external_id") else None
-        }
-    # fallback minimal
-    return {
-        "customer_name": data.get("customer_name") or data.get("name") or "",
-        "customer_phone": data.get("customer_phone") or data.get("phone") or "",
-        "items": [],
-        "external_id": str(data.get("id")) if data.get("id") else None
-    }
 
 
 def adapt_incoming_order(data, brand=None):
     """
-    Detect incoming payload shape and call the right adapter.
-    Returns a dict ready for OrderSerializer (without brand, since brand is handled by perform_create).
+    Detect payload type and call the correct adapter, returning dict with customer info.
+    Always returns: { customer: {...}, items: [...], external_id: str|None }
     """
-    # Detect Shopify-ish
     if isinstance(data, dict):
         if "line_items" in data and "customer" in data:
             return adapt_shopify_order(data, brand)
@@ -123,12 +139,17 @@ def adapt_incoming_order(data, brand=None):
             return adapt_woocommerce_order(data, brand)
         if "billing" in data and "line_items" in data:
             return adapt_woocommerce_order(data, brand)
-        # some shops use 'items' or 'order_items'
         if "items" in data and isinstance(data.get("items"), list):
-            # check first item keys for 'product_name' or 'name'
-            first = (data.get("items") or [None])[0]
-            if first and ("name" in first or "product_name" in first):
-                return adapt_generic_shop_order(data, brand)
+            # generic fallback
+            return {
+                "customer": data.get("customer", {}),
+                "items": data.get("items", []),
+                "external_id": str(data.get("external_id")) if data.get("external_id") else None
+            }
 
-    # otherwise fallback
-    return adapt_generic_shop_order(data, brand)
+    # fallback minimal
+    return {
+        "customer": data.get("customer", {}),
+        "items": [],
+        "external_id": str(data.get("id")) if data.get("id") else None
+    }

@@ -15,8 +15,7 @@ class Brand(models.Model):
 class Order(models.Model):
     external_id = models.CharField(max_length=255, blank=True, null=True, unique=True)  
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="orders")
-    customer_name = models.CharField(max_length=100)
-    customer_phone = models.CharField(max_length=20)
+    customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="orders", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     forwarded_to_delivery = models.BooleanField(default=False)
 
@@ -32,6 +31,22 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_name} (x{self.quantity})"
+    
+    
+class Customer(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    country = models.CharField(max_length=50)
+    postal_code = models.CharField(max_length=20, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+    
 
 
 class Confirmation(models.Model):

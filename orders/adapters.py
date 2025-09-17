@@ -27,6 +27,7 @@ def adapt_shopify_order(data, brand=None):
     last_name = shipping_address.get("last_name") or ""
     phone = shipping_address.get("phone") or ""
     address = shipping_address.get("address1") or ""
+    apartment = shipping_address.get("address2") or ""
     city = shipping_address.get("city") or ""
     state = shipping_address.get("province") or ""
     country = shipping_address.get("country") or ""
@@ -62,6 +63,7 @@ def adapt_shopify_order(data, brand=None):
             "email": email,
             "phone": phone,
             "address": address,
+            "apartment": apartment,
             "city": city,
             "state": state,
             "country": country,
@@ -87,6 +89,7 @@ def adapt_woocommerce_order(data, brand=None):
     email = billing.get("email") or ""
     phone = shipping.get("phone") or billing.get("phone") or "" 
     address = shipping.get("address_1") or billing.get("address_1") or ""
+    apartment = shipping.get("address_2") or billing.get("address_2") or ""
     city = shipping.get("city") or billing.get("city") or ""
     state = shipping.get("state") or billing.get("state") or ""
     country = shipping.get("country") or billing.get("country") or ""
@@ -123,6 +126,7 @@ def adapt_woocommerce_order(data, brand=None):
             "email": email,
             "phone": phone,
             "address": address,
+            "apartment": apartment,
             "city": city,
             "state": state,
             "country": country,

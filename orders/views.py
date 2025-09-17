@@ -78,6 +78,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                  email = customer_data.get("email", ""),
                  phone = customer_data.get("phone", ""),
                  address = customer_data.get("address", ""),
+                 apartment = customer_data.get("apartment", ""),
                  city = customer_data.get("city", ""),
                  state = customer_data.get("state", ""),
                  country = customer_data.get("country", ""),

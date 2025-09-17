@@ -39,6 +39,7 @@ class Customer(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     address = models.CharField(max_length=255)
+    apartment = models.CharField(max_length=100, null=True, blank=True)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     country = models.CharField(max_length=50)

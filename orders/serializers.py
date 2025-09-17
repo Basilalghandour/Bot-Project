@@ -23,6 +23,7 @@ class CustomerSerializer(serializers.ModelSerializer):
             "email",
             "phone",
             "address",
+            "apartment",
             "city",
             "state",
             "country",

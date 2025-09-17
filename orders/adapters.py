@@ -33,17 +33,16 @@ def adapt_shopify_order(data, brand=None):
     postal_code = shipping_address.get("zip") or None
 
     # 🔹 Always create a new customer row
-    Customer.objects.create(
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        phone=phone,
-        address=address,
-        city=city,
-        state=state,
-        country=country,
-        postal_code=postal_code,
-    )
+   # Customer.objects.create(
+    #    first_name=first_name,
+     #  email=email,
+     #   phone=phone,
+     #   address=address,
+     #   city=city,
+     #   state=state,
+      #  country=country,
+       # postal_code=postal_code,
+   # )
 
     # Adapt order items
     items = []
@@ -83,28 +82,27 @@ def adapt_woocommerce_order(data, brand=None):
     billing = data.get("billing", {}) or {}
 
     # Prefer shipping info, fallback to billing
-    first_name = shipping.get("first_name") or billing.get("first_name") or ""
-    last_name = shipping.get("last_name") or billing.get("last_name") or ""
+    first_name = shipping.get("first_name") or ""
+    last_name = shipping.get("last_name") or ""
     email = billing.get("email") or ""
-    phone = shipping.get("phone") or billing.get("phone") or ""
-    address = shipping.get("address_1") or billing.get("address_1") or ""
-    city = shipping.get("city") or billing.get("city") or ""
-    state = shipping.get("state") or billing.get("state") or ""
-    country = shipping.get("country") or billing.get("country") or ""
-    postal_code = shipping.get("postcode") or billing.get("postcode") or None
+    phone = shipping.get("phone") or ""
+    address = shipping.get("address_1") or ""
+    city = shipping.get("city") or ""
+    state = shipping.get("state") or ""
+    country = shipping.get("country") or ""
+    postal_code = shipping.get("postcode") or None
 
     # Always create a new customer row
-    Customer.objects.create(
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        phone=phone,
-        address=address,
-        city=city,
-        state=state,
-        country=country,
-        postal_code=postal_code,
-    )
+   # Customer.objects.create(
+    #    first_name=first_name,
+     #   last_name=last_name,
+     #   email=email,
+     #   phone=phone,
+      #  address=address,
+       # state=state,
+       # country=country,
+       # postal_code=postal_code,
+   # )
 
     # Adapt order items with unit price
     items = []

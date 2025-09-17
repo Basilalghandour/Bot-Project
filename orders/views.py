@@ -43,18 +43,17 @@ class OrderViewSet(viewsets.ModelViewSet):
         customer_data = adapted.pop("customer", {})
 
         # Create or get Customer instance
-        customer, _ = Customer.objects.get_or_create(
-            email=customer_data.get("email"),
-            defaults={
-                "first_name": customer_data.get("first_name", ""),
-                "last_name": customer_data.get("last_name", ""),
-                "phone": customer_data.get("phone", ""),
-                "address": customer_data.get("address", ""),
-                "city": customer_data.get("city", ""),
-                "state": customer_data.get("state", ""),
-                "country": customer_data.get("country", ""),
-                "postal_code": customer_data.get("postal_code", ""),
-            }
+        customer = Customer.objects.create(
+                 first_name = customer_data.get("first_name", ""),
+                 last_name = customer_data.get("last_name", ""),
+                 email = customer_data.get("email", ""),
+                 phone = customer_data.get("phone", ""),
+                 address = customer_data.get("address", ""),
+                 city = customer_data.get("city", ""),
+                 state = customer_data.get("state", ""),
+                 country = customer_data.get("country", ""),
+                 postal_code = customer_data.get("postal_code", ""),
+            
         )
 
         # Pass customer instance via context

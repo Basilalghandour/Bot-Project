@@ -17,35 +17,35 @@ def _to_decimal(value, default=Decimal("0.00")):
 def adapt_shopify_order(data, brand=None):
     """Convert Shopify order payload into Order + Customer info (persist + dict)."""
     customer_data = data.get("customer", {}) or {}
-    billing_address = data.get("billing_address", {}) or {}
+    shipping_address = data.get("shipping_address", {}) or {}
 
-    first_name = customer_data.get("first_name") or billing_address.get("first_name") or ""
-    last_name = customer_data.get("last_name") or billing_address.get("last_name") or ""
-    email = customer_data.get("email") or billing_address.get("email") or ""
-    phone = customer_data.get("phone") or billing_address.get("phone") or ""
+    # 🔹 Email always from customer object
+    email = customer_data.get("email") or ""
 
-    address = billing_address.get("address1") or ""
-    city = billing_address.get("city") or ""
-    state = billing_address.get("province") or ""
-    country = billing_address.get("country") or ""
-    postal_code = billing_address.get("zip") or None
+    # 🔹 All other info from shipping address
+    first_name = shipping_address.get("first_name") or ""
+    last_name = shipping_address.get("last_name") or ""
+    phone = shipping_address.get("phone") or ""
+    address = shipping_address.get("address1") or ""
+    city = shipping_address.get("city") or ""
+    state = shipping_address.get("province") or ""
+    country = shipping_address.get("country") or ""
+    postal_code = shipping_address.get("zip") or None
 
-    # Save / update customer in DB
-    Customer.objects.update_or_create(
+    # 🔹 Always create a new customer row
+    Customer.objects.create(
+        first_name=first_name,
+        last_name=last_name,
         email=email,
-        defaults={
-            "first_name": first_name,
-            "last_name": last_name,
-            "phone": phone,
-            "address": address,
-            "city": city,
-            "state": state,
-            "country": country,
-            "postal_code": postal_code,
-        }
+        phone=phone,
+        address=address,
+        city=city,
+        state=state,
+        country=country,
+        postal_code=postal_code,
     )
 
-    # Still return dict so your serializers don’t break
+    # Adapt order items
     items = []
     for li in data.get("line_items", []) or []:
         qty = li.get("quantity") or li.get("qty") or 1
@@ -79,31 +79,43 @@ def adapt_shopify_order(data, brand=None):
 
 def adapt_woocommerce_order(data, brand=None):
     """Convert WooCommerce order payload into Order + Customer info."""
+    shipping = data.get("shipping", {}) or {}
     billing = data.get("billing", {}) or {}
 
-    first_name = billing.get("first_name") or ""
-    last_name = billing.get("last_name") or ""
+    # Prefer shipping info, fallback to billing
+    first_name = shipping.get("first_name") or billing.get("first_name") or ""
+    last_name = shipping.get("last_name") or billing.get("last_name") or ""
     email = billing.get("email") or ""
-    phone = billing.get("phone") or ""
-    address = billing.get("address_1") or ""
-    city = billing.get("city") or ""
-    state = billing.get("state") or ""
-    country = billing.get("country") or ""
-    postal_code = billing.get("postcode") or None
+    phone = shipping.get("phone") or billing.get("phone") or ""
+    address = shipping.get("address_1") or billing.get("address_1") or ""
+    city = shipping.get("city") or billing.get("city") or ""
+    state = shipping.get("state") or billing.get("state") or ""
+    country = shipping.get("country") or billing.get("country") or ""
+    postal_code = shipping.get("postcode") or billing.get("postcode") or None
 
+    # Always create a new customer row
+    Customer.objects.create(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        phone=phone,
+        address=address,
+        city=city,
+        state=state,
+        country=country,
+        postal_code=postal_code,
+    )
+
+    # Adapt order items with unit price
     items = []
     for li in data.get("line_items", []) or []:
         qty = li.get("quantity") or li.get("qty") or 1
-        # --- CHANGE THIS LINE ---
-        # WooCommerce gives "total" (line total) and "price"/"subtotal" can vary.
-        # So calculate unit price safely:
         total = _to_decimal(li.get("total") or 0)
         unit_price = (total / qty) if qty else total
-        # ------------------------
         items.append({
             "product_name": li.get("name") or li.get("title") or "item",
             "quantity": int(qty),
-            "price": str(unit_price),  # save unit price instead of total
+            "price": str(unit_price),
         })
 
     adapted = {
@@ -140,14 +152,12 @@ def adapt_incoming_order(data, brand=None):
         if "billing" in data and "line_items" in data:
             return adapt_woocommerce_order(data, brand)
         if "items" in data and isinstance(data.get("items"), list):
-            # generic fallback
             return {
                 "customer": data.get("customer", {}),
                 "items": data.get("items", []),
                 "external_id": str(data.get("external_id")) if data.get("external_id") else None
             }
 
-    # fallback minimal
     return {
         "customer": data.get("customer", {}),
         "items": [],

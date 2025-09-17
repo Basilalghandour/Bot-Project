@@ -27,7 +27,36 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @csrf_exempt
     def create(self, request, *args, **kwargs):
-        print("Incoming payload:", json.dumps(request.data, indent=2))
+        try:
+            print("=== WEBHOOK REQUEST START ===")
+            print("METHOD:", request.method)
+            print("PATH:", request.path)
+            print("CONTENT_TYPE:", request.content_type)
+            headers = {k: v for k, v in request.META.items() if k.startswith("HTTP_")}
+            print("HEADERS:", json.dumps(headers, indent=2)[:2000])
+            print("RAW BODY:", request.body[:500])
+            print("request.data preview:", json.dumps(request.data, indent=2) if request.data else None)
+            print("=== WEBHOOK REQUEST END ===")
+        except Exception as e:
+            print("Error logging request:", e)
+
+        # ---- Handle GET/HEAD (reachability ping) ----
+        if request.method != "POST":
+            return Response({"detail": "ok - ping (non-POST)"}, status=status.HTTP_200_OK)
+
+        # ---- Parse payload ----
+        payload = request.data or {}
+
+        # ---- Define what real orders look like ----
+        order_keys = {"line_items", "billing", "customer", "items", "order_key", "total"}
+
+        # ---- Detect WooCommerce "test ping" ----
+        if not any(key in payload for key in order_keys):
+            # Example: {"webhook_id": "1"}
+            return Response({"detail": "ok - webhook test/handshake"}, status=status.HTTP_200_OK)
+
+     
+        
         brand_id = self.kwargs.get("brand_pk")
         brand = None
 

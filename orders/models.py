@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 class Brand(models.Model):
     name = models.CharField(max_length=100)
@@ -6,6 +7,7 @@ class Brand(models.Model):
     contact_email = models.EmailField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    webhook_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
     def __str__(self):
         return self.name

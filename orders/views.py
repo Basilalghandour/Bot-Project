@@ -13,6 +13,8 @@ import json
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
+    lookup_field = "webhook_id"
+    lookup_value_regex = "[0-9a-f-]{32}"  # UUID regex
 
 
 class OrderViewSet(viewsets.ModelViewSet):

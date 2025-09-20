@@ -112,3 +112,13 @@ class CustomerOrderViewSet(viewsets.ModelViewSet):
 class ConfirmationViewSet(viewsets.ModelViewSet):
     queryset = Confirmation.objects.all()
     serializer_class = ConfirmationSerializer
+
+
+class DashboardViewSet(viewsets.ModelViewSet):
+    queryset = Brand.objects.all()
+    http_method_names = ['get']
+    
+    def list(self, request, *args, **kwargs):
+        return Response({"message": "ok - dashboard"}, status=status.HTTP_200_OK)
+    
+    

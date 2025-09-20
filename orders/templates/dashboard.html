@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm It - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --primary-green: #2ecc71;
+            --text-white: #e0e0e0;
+            --text-grey: #a0a0a0;
+            --text-dark-grey: #6b6b6b;
+            --status-pending: #f39c12;
+            --status-cancelled: #e74c3c;
+            --font-family: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            font-size: 15px;
+            line-height: 1.5;
+            padding-top: 100px;
+            zoom: 0.9;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        h2, h3 {
+            font-weight: 600;
+        }
+
+        /* --- Fixed Logo (Replaces Navbar) --- */
+        #fixed-logo {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 1000;
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #fixed-logo .logo-img {
+            width: 200px; /* Maintains aspect ratio */
+            vertical-align: middle;
+        }
+        .applogo {
+            position: fixed;
+            top: -60px;
+            left: 20px;
+            width: 220px; /* Adjust size as needed */
+            z-index: 1000;
+        }
+        
+        /* --- Statistics Section --- */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            background-color: #252525;
+            border-color: #4a4a4a;
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2rem;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+        
+        .stat-card .card-icon.total-icon { background-color: #555; }
+        .stat-card .card-icon.confirmed-icon { background-color: var(--primary-green); padding: 5px; } /* Added padding */
+        .stat-card .card-icon.pending-icon { background-color: var(--status-pending); }
+        .stat-card .card-icon.cancelled-icon { background-color: var(--status-cancelled); }
+        
+        .card-icon img {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        .card-content h3 {
+            color: var(--text-grey);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-content p {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+
+        /* --- Orders Section --- */
+        .orders-section {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .orders-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .filter-toggle {
+            display: none;
+            background: var(--border-color);
+            color: var(--text-white);
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-family);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .filter-controls select {
+            background-color: #2a2a2a;
+            color: var(--text-white);
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: var(--font-family);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .filter-controls select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        /* --- Orders Table --- */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        thead th {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-grey);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom-width: 2px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #222222;
+        }
+
+        tbody tr:hover {
+            background-color: #2c2c2c;
+        }
+        
+        td {
+            font-size: 0.95rem;
+        }
+
+        .status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-align: center;
+        }
+
+        .status .icon-img {
+            height: 0.9em; 
+            width: auto;
+            vertical-align: middle;
+        }
+        
+        .status.confirmed { background-color: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+        .status.pending { background-color: rgba(243, 156, 18, 0.15); color: #f39c12; }
+        .status.pending .icon { color: #f39c12; }
+        .status.cancelled { background-color: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+        .status.cancelled .icon { color: #e74c3c; }
+
+
+        /* --- Responsiveness --- */
+        @media (max-width: 768px) {
+            body { 
+                font-size: 14px;
+                padding-top: 80px;
+                zoom: 1; 
+            }
+            .container { padding: 0 15px; }
+
+            #fixed-logo {
+                font-size: 1.5rem;
+                top: 20px;
+                left: 15px;
+            }
+
+            .orders-header { flex-direction: column; align-items: flex-start; }
+            .filter-toggle { display: block; }
+            .filter-controls { display: none; flex-direction: column; width: 100%; margin-top: 10px; }
+            .filter-controls.active { display: flex; }
+            th, td { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+   
+       
+        <img src="applogo.png" alt="Confirm It Logo" class="applogo">
+
+
+    <main class="container">
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="card-icon total-icon">&#9633;</div>
+                <div class="card-content">
+                    <h3>Total Orders</h3>
+                    <p>1,250</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="card-icon confirmed-icon">
+                    <img src="logo.png" alt="Confirmed">
+                </div>
+                <div class="card-content">
+                    <h3>Confirmed Orders</h3>
+                    <p>980</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="card-icon pending-icon">&#8987;</div>
+                <div class="card-content">
+                    <h3>Pending Orders</h3>
+                    <p>210</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="card-icon cancelled-icon">&#10006;</div>
+                <div class="card-content">
+                    <h3>Cancelled Orders</h3>
+                    <p>60</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="orders-section">
+            <div class="orders-header">
+                <h2>Recent Orders</h2>
+                <div class="filters">
+                    <button class="filter-toggle" id="filter-toggle-btn">Filters 🔽</button>
+                    <div class="filter-controls" id="filter-controls">
+                        <select id="status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <select id="date-filter">
+                            <option value="all-time">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="last-week">Last Week</option>
+                            <option value="last-month">Last Month</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Phone</th>
+                            <th>Governorate</th>
+                            <th>Items</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ahmed Ali</td>
+                            <td>01012345678</td>
+                            <td>Cairo</td>
+                            <td>Laptop, Mouse</td>
+                            <td>$1250</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Fatima Zahra</td>
+                            <td>01298765432</td>
+                            <td>Alexandria</td>
+                            <td>Keyboard</td>
+                            <td>$80</td>
+                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Youssef Ibrahim</td>
+                            <td>01155558888</td>
+                            <td>Giza</td>
+                            <td>Monitor</td>
+                            <td>$300</td>
+                            <td><span class="status cancelled"><span class="icon">&#10006;</span> Cancelled</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mariam Hassan</td>
+                            <td>01543219876</td>
+                            <td>Dakahlia</td>
+                            <td>Webcam, Headset</td>
+                            <td>$150</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                         <tr>
+                            <td>Khaled Mohamed</td>
+                            <td>01000111222</td>
+                            <td>Cairo</td>
+                            <td>USB Hub</td>
+                            <td>$25</td>
+                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Nourhan Said</td>
+                            <td>01123456789</td>
+                            <td>Sharqia</td>
+                            <td>Gaming Chair</td>
+                            <td>$220</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Omar Abdullah</td>
+                            <td>01222333444</td>
+                            <td>Gharbia</td>
+                            <td>Microphone</td>
+                            <td>$95</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Salma Tarek</td>
+                            <td>01098765432</td>
+                            <td>Aswan</td>
+                            <td>External SSD</td>
+                            <td>$110</td>
+                            <td><span class="status cancelled"><span class="icon">&#10006;</span> Cancelled</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mahmoud Elsayed</td>
+                            <td>01551234567</td>
+                            <td>Qalyubia</td>
+                            <td>Power Bank</td>
+                            <td>$40</td>
+                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Hana Gamal</td>
+                            <td>01287654321</td>
+                            <td>Suez</td>
+                            <td>Laptop Stand</td>
+                            <td>$35</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                         <tr>
+                            <td>Amr Diab</td>
+                            <td>01111111111</td>
+                            <td>Port Said</td>
+                            <td>VR Headset</td>
+                            <td>$450</td>
+                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Laila Adel</td>
+                            <td>01065432198</td>
+                            <td>Ismailia</td>
+                            <td>Printer</td>
+                            <td>$180</td>
+                            <td><span class="status confirmed">Confirmed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const filterToggleButton = document.getElementById('filter-toggle-btn');
+            const filterControls = document.getElementById('filter-controls');
+
+            if (filterToggleButton && filterControls) {
+                filterToggleButton.addEventListener('click', () => {
+                    filterControls.classList.toggle('active');
+                });
+            }
+
+            // Placeholder logs for filter functionality
+            const statusFilter = document.getElementById('status-filter');
+            const dateFilter = document.getElementById('date-filter');
+            
+            if (statusFilter) {
+                statusFilter.addEventListener('change', (event) => {
+                    console.log(`Filtering by status: ${event.target.value}`);
+                });
+            }
+
+            if (dateFilter) {
+                dateFilter.addEventListener('change', (event) => {
+                    console.log(`Filtering by date: ${event.target.value}`);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -29,18 +29,29 @@
             box-sizing: border-box;
         }
 
+        /* --- Animation Keyframes --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
             font-family: var(--font-family);
             background-color: var(--bg-dark);
             color: var(--text-white);
             font-size: 15px;
             line-height: 1.5;
-            padding-top: 100px;
             zoom: 0.9;
         }
 
         main {
-            padding-top: 100px;
+            padding-top: 40px; 
         }
 
         .container {
@@ -53,13 +64,16 @@
             font-weight: 600;
         }
 
-        /* --- Fixed Logo --- */
+        /* --- Logo (Static) --- */
         .applogo {
-            position: fixed;
-            top: -60px;
-            left: 20px;
-            width: 220px; /* Adjust size as needed */
-            z-index: 1000;
+            object-fit: cover;
+            height: 100px;
+            width: 220px;
+            left: 0px;
+            margin: 0px;
+            /* Animation */
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
         }
         
         /* --- Statistics Section --- */
@@ -77,7 +91,16 @@
             border: 1px solid var(--border-color);
             position: relative;
             transition: background-color 0.2s ease, border-color 0.2s ease;
+            /* Animation */
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
         }
+        
+        /* Staggered Animation Delay for Cards */
+        .stat-card:nth-child(1) { animation-delay: 0.2s; }
+        .stat-card:nth-child(2) { animation-delay: 0.4s; }
+        .stat-card:nth-child(3) { animation-delay: 0.6s; }
+        .stat-card:nth-child(4) { animation-delay: 0.8s; }
         
         .stat-card:hover {
             background-color: #252525;
@@ -98,7 +121,6 @@
             color: var(--text-white);
         }
         
-        /* Icon Styling */
         .stat-card .card-icon.total-icon { font-size: 1.5rem; background-color: #555; } 
         .stat-card .card-icon.confirmed-icon { background-color: var(--primary-green); padding: 6px; }
         .stat-card .card-icon.pending-icon { background-color: var(--status-pending); padding: 6px; }
@@ -131,6 +153,10 @@
             padding: 25px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
+            /* Animation */
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+            animation-delay: 1.0s; /* Starts after the cards finish */
         }
 
         .orders-header {
@@ -146,36 +172,83 @@
             font-size: 1.2rem;
         }
 
-        .filter-toggle {
-            display: none;
-            background: var(--border-color);
-            color: var(--text-white);
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: var(--font-family);
-        }
-
         .filter-controls {
             display: flex;
             gap: 12px;
         }
 
-        .filter-controls select {
+        /* --- Custom Animated Dropdown --- */
+        .custom-select-wrapper {
+            position: relative;
+            width: 180px;
+            font-family: var(--font-family);
+        }
+
+        .select-selected {
             background-color: #2a2a2a;
             color: var(--text-white);
             padding: 8px 12px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            font-family: var(--font-family);
             cursor: pointer;
             font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s ease;
+        }
+
+        .custom-select-wrapper.active .select-selected {
+            border-color: var(--primary-green);
+        }
+
+        .select-selected::after { /* Custom arrow */
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--text-grey);
+            transition: transform 0.2s ease;
         }
         
-        .filter-controls select:focus {
-            outline: none;
-            border-color: var(--primary-green);
+        .custom-select-wrapper.active .select-selected::after {
+            transform: rotate(180deg);
+        }
+
+        .select-items {
+            position: absolute;
+            background-color: #2a2a2a;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+        
+        .custom-select-wrapper.active .select-items {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .select-items div {
+            color: var(--text-white);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .select-items div:hover {
+            background-color: var(--primary-green);
+            color: #fff;
         }
 
         /* --- Orders Table --- */
@@ -253,29 +326,28 @@
                 zoom: 1; 
             }
             main {
-                padding-top: 80px;
+                padding-top: 30px;
             }
             .container { padding: 0 15px; }
 
             .applogo {
                 width: 150px;
-                top: 15px;
-                left: 15px;
+                margin-bottom: 30px;
             }
 
             .orders-header { flex-direction: column; align-items: flex-start; }
-            .filter-toggle { display: block; }
-            .filter-controls { display: none; flex-direction: column; width: 100%; margin-top: 10px; }
-            .filter-controls.active { display: flex; }
+            .filter-controls { flex-direction: column; width: 100%; }
+            .custom-select-wrapper { width: 100%; }
             th, td { padding: 10px; }
         }
     </style>
 </head>
 <body>
        
-    <img src="applogo.png" alt="Confirm It Logo" class="applogo">
-
     <main class="container">
+        
+        <img src="applogo.png" alt="Confirm It Logo" class="applogo">
+
         <section class="stats-section">
             <div class="stat-card">
                 <div class="card-icon total-icon">📦</div>
@@ -316,21 +388,25 @@
         <section class="orders-section">
             <div class="orders-header">
                 <h2>Recent Orders</h2>
-                <div class="filters">
-                    <button class="filter-toggle" id="filter-toggle-btn">Filters 🔽</button>
-                    <div class="filter-controls" id="filter-controls">
-                        <select id="status-filter">
-                            <option value="all">All Statuses</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="pending">Pending</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                        <select id="date-filter">
-                            <option value="all-time">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="last-week">Last Week</option>
-                            <option value="last-month">Last Month</option>
-                        </select>
+                <div class="filter-controls">
+                    <div class="custom-select-wrapper">
+                        <div class="select-selected">All Statuses</div>
+                        <div class="select-items">
+                            <div data-value="all">All Statuses</div>
+                            <div data-value="confirmed">Confirmed</div>
+                            <div data-value="pending">Pending</div>
+                            <div data-value="cancelled">Cancelled</div>
+                        </div>
+                    </div>
+
+                    <div class="custom-select-wrapper">
+                        <div class="select-selected">All Time</div>
+                        <div class="select-items">
+                            <div data-value="all-time">All Time</div>
+                            <div data-value="today">Today</div>
+                            <div data-value="last-week">Last Week</div>
+                            <div data-value="last-month">Last Month</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -342,7 +418,7 @@
                             <th>Customer Name</th>
                             <th>Phone</th>
                             <th>Governorate</th>
-                            <th>Items</th>
+                            <th>Order Id</th>
                             <th>Price</th>
                             <th>Status</th>
                         </tr>
@@ -352,7 +428,7 @@
                             <td>Ahmed Ali</td>
                             <td>01012345678</td>
                             <td>Cairo</td>
-                            <td>Laptop, Mouse</td>
+                            <td>78</td>
                             <td>$1250</td>
                             <td>
                                 <span class="status confirmed">
@@ -365,7 +441,7 @@
                             <td>Fatima Zahra</td>
                             <td>01298765432</td>
                             <td>Alexandria</td>
-                            <td>Keyboard</td>
+                            <td>34</td>
                             <td>$80</td>
                             <td>
                                 <span class="status pending">
@@ -378,7 +454,7 @@
                             <td>Youssef Ibrahim</td>
                             <td>01155558888</td>
                             <td>Giza</td>
-                            <td>Monitor</td>
+                            <td>86</td>
                             <td>$300</td>
                             <td>
                                 <span class="status cancelled">
@@ -391,7 +467,7 @@
                             <td>Mariam Hassan</td>
                             <td>01543219876</td>
                             <td>Dakahlia</td>
-                            <td>Webcam, Headset</td>
+                            <td>90</td>
                             <td>$150</td>
                             <td>
                                 <span class="status confirmed">
@@ -404,7 +480,7 @@
                             <td>Khaled Mohamed</td>
                             <td>01000111222</td>
                             <td>Cairo</td>
-                            <td>USB Hub</td>
+                            <td>45</td>
                             <td>$25</td>
                             <td>
                                 <span class="status pending">
@@ -417,7 +493,7 @@
                             <td>Nourhan Said</td>
                             <td>01123456789</td>
                             <td>Sharqia</td>
-                            <td>Gaming Chair</td>
+                            <td>59</td>
                             <td>$220</td>
                             <td>
                                 <span class="status confirmed">
@@ -430,7 +506,7 @@
                             <td>Omar Abdullah</td>
                             <td>01222333444</td>
                             <td>Gharbia</td>
-                            <td>Microphone</td>
+                            <td>67</td>
                             <td>$95</td>
                             <td>
                                 <span class="status confirmed">
@@ -443,7 +519,7 @@
                             <td>Salma Tarek</td>
                             <td>01098765432</td>
                             <td>Aswan</td>
-                            <td>External SSD</td>
+                            <td>70</td>
                             <td>$110</td>
                             <td>
                                 <span class="status cancelled">
@@ -456,7 +532,7 @@
                             <td>Mahmoud Elsayed</td>
                             <td>01551234567</td>
                             <td>Qalyubia</td>
-                            <td>Power Bank</td>
+                            <td>13</td>
                             <td>$40</td>
                             <td>
                                 <span class="status pending">
@@ -469,7 +545,7 @@
                             <td>Hana Gamal</td>
                             <td>01287654321</td>
                             <td>Suez</td>
-                            <td>Laptop Stand</td>
+                            <td>56</td>
                             <td>$35</td>
                             <td>
                                 <span class="status confirmed">
@@ -482,7 +558,7 @@
                             <td>Amr Diab</td>
                             <td>01111111111</td>
                             <td>Port Said</td>
-                            <td>VR Headset</td>
+                            <td>92</td>
                             <td>$450</td>
                             <td>
                                 <span class="status pending">
@@ -495,7 +571,7 @@
                             <td>Laila Adel</td>
                             <td>01065432198</td>
                             <td>Ismailia</td>
-                            <td>Printer</td>
+                            <td>26</td>
                             <td>$180</td>
                             <td>
                                 <span class="status confirmed">
@@ -512,31 +588,36 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Custom Select Dropdown Logic ---
+            document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+                const selected = wrapper.querySelector('.select-selected');
+                const optionsContainer = wrapper.querySelector('.select-items');
+                const optionsList = optionsContainer.querySelectorAll('div');
 
-            const filterToggleButton = document.getElementById('filter-toggle-btn');
-            const filterControls = document.getElementById('filter-controls');
-
-            if (filterToggleButton && filterControls) {
-                filterToggleButton.addEventListener('click', () => {
-                    filterControls.classList.toggle('active');
+                selected.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    document.querySelectorAll('.custom-select-wrapper').forEach(otherWrapper => {
+                        if (otherWrapper !== wrapper) {
+                            otherWrapper.classList.remove('active');
+                        }
+                    });
+                    wrapper.classList.toggle('active');
                 });
-            }
 
-            // Placeholder logs for filter functionality
-            const statusFilter = document.getElementById('status-filter');
-            const dateFilter = document.getElementById('date-filter');
-            
-            if (statusFilter) {
-                statusFilter.addEventListener('change', (event) => {
-                    console.log(`Filtering by status: ${event.target.value}`);
+                optionsList.forEach(option => {
+                    option.addEventListener('click', () => {
+                        selected.textContent = option.textContent;
+                        wrapper.classList.remove('active');
+                        console.log(`Filter changed to: ${option.getAttribute('data-value')}`);
+                    });
                 });
-            }
+            });
 
-            if (dateFilter) {
-                dateFilter.addEventListener('change', (event) => {
-                    console.log(`Filtering by date: ${event.target.value}`);
+            window.addEventListener('click', () => {
+                document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+                    wrapper.classList.remove('active');
                 });
-            }
+            });
         });
     </script>
 </body>

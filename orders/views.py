@@ -21,10 +21,10 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        brand_id = self.kwargs.get("brand_pk")
-        if brand_id:
-            get_object_or_404(Brand, pk=brand_id)
-            return Order.objects.filter(brand_id=brand_id)
+        brand_webhook_id = self.kwargs.get("brand_webhook_id")
+        if brand_webhook_id:
+            brand = get_object_or_404(Brand, webhook_id=brand_webhook_id)
+            return Order.objects.filter(brand=brand)
         return Order.objects.all()
 
     @csrf_exempt
@@ -59,11 +59,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
      
         
-        brand_id = self.kwargs.get("brand_pk")
+        brand_webhook_id = self.kwargs.get("brand_webhook_id")
         brand = None
 
-        if brand_id:
-            brand = get_object_or_404(Brand, pk=brand_id)
+        if brand_webhook_id:
+            brand = get_object_or_404(Brand, webhook_id=brand_webhook_id)
         else:
             domain = request.data.get("store_domain") or request.data.get("meta_data", [{}])[0].get("value")
             if domain:

@@ -39,6 +39,10 @@
             zoom: 0.9;
         }
 
+        main {
+            padding-top: 100px;
+        }
+
         .container {
             max-width: 1600px;
             margin: 0 auto;
@@ -49,24 +53,7 @@
             font-weight: 600;
         }
 
-        /* --- Fixed Logo (Replaces Navbar) --- */
-        #fixed-logo {
-            position: fixed;
-            top: 30px;
-            left: 30px;
-            z-index: 1000;
-            font-size: 1.8rem;
-            color: var(--primary-green);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        #fixed-logo .logo-img {
-            width: 200px; /* Maintains aspect ratio */
-            vertical-align: middle;
-        }
+        /* --- Fixed Logo --- */
         .applogo {
             position: fixed;
             top: -60px;
@@ -101,7 +88,6 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            font-size: 1.2rem;
             width: 30px;
             height: 30px;
             display: flex;
@@ -112,16 +98,17 @@
             color: var(--text-white);
         }
         
-        .stat-card .card-icon.total-icon { background-color: #555; }
-        .stat-card .card-icon.confirmed-icon { background-color: var(--primary-green); padding: 5px; } /* Added padding */
-        .stat-card .card-icon.pending-icon { background-color: var(--status-pending); }
-        .stat-card .card-icon.cancelled-icon { background-color: var(--status-cancelled); }
+        /* Icon Styling */
+        .stat-card .card-icon.total-icon { font-size: 1.5rem; background-color: #555; } 
+        .stat-card .card-icon.confirmed-icon { background-color: var(--primary-green); padding: 6px; }
+        .stat-card .card-icon.pending-icon { background-color: var(--status-pending); padding: 6px; }
+        .stat-card .card-icon.cancelled-icon { background-color: var(--status-cancelled); padding: 6px; }
         
-        .card-icon img {
+        .card-icon svg {
             width: 100%;
             height: 100%;
+            fill: white;
         }
-
 
         .card-content h3 {
             color: var(--text-grey);
@@ -243,32 +230,36 @@
             gap: 5px;
             text-align: center;
         }
-
-        .status .icon-img {
-            height: 0.9em; 
-            width: auto;
-            vertical-align: middle;
+        
+        .status .icon-svg {
+            height: 1.1em;
+            width: 1.1em;
         }
         
         .status.confirmed { background-color: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+        .status.confirmed .icon-svg path { fill: var(--primary-green); }
+
         .status.pending { background-color: rgba(243, 156, 18, 0.15); color: #f39c12; }
-        .status.pending .icon { color: #f39c12; }
+        .status.pending .icon-svg path { fill: var(--status-pending); }
+
         .status.cancelled { background-color: rgba(231, 76, 60, 0.15); color: #e74c3c; }
-        .status.cancelled .icon { color: #e74c3c; }
+        .status.cancelled .icon-svg path { fill: var(--status-cancelled); }
 
 
         /* --- Responsiveness --- */
         @media (max-width: 768px) {
             body { 
                 font-size: 14px;
-                padding-top: 80px;
                 zoom: 1; 
+            }
+            main {
+                padding-top: 80px;
             }
             .container { padding: 0 15px; }
 
-            #fixed-logo {
-                font-size: 1.5rem;
-                top: 20px;
+            .applogo {
+                width: 150px;
+                top: 15px;
                 left: 15px;
             }
 
@@ -281,16 +272,13 @@
     </style>
 </head>
 <body>
-
-   
        
-        <img src="applogo.png" alt="Confirm It Logo" class="applogo">
-
+    <img src="applogo.png" alt="Confirm It Logo" class="applogo">
 
     <main class="container">
         <section class="stats-section">
             <div class="stat-card">
-                <div class="card-icon total-icon">&#9633;</div>
+                <div class="card-icon total-icon">📦</div>
                 <div class="card-content">
                     <h3>Total Orders</h3>
                     <p>1,250</p>
@@ -298,7 +286,7 @@
             </div>
             <div class="stat-card">
                 <div class="card-icon confirmed-icon">
-                    <img src="logo.png" alt="Confirmed">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
                 </div>
                 <div class="card-content">
                     <h3>Confirmed Orders</h3>
@@ -306,14 +294,18 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="card-icon pending-icon">&#8987;</div>
+                <div class="card-icon pending-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M13 7h-2v6l5.25 3.15.75-1.23-4-2.42V7z"></path></svg>
+                </div>
                 <div class="card-content">
                     <h3>Pending Orders</h3>
                     <p>210</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="card-icon cancelled-icon">&#10006;</div>
+                <div class="card-icon cancelled-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                </div>
                 <div class="card-content">
                     <h3>Cancelled Orders</h3>
                     <p>60</p>
@@ -362,7 +354,12 @@
                             <td>Cairo</td>
                             <td>Laptop, Mouse</td>
                             <td>$1250</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
+                            <td>
+                                <span class="status confirmed">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
+                                    Confirmed
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Fatima Zahra</td>
@@ -370,7 +367,12 @@
                             <td>Alexandria</td>
                             <td>Keyboard</td>
                             <td>$80</td>
-                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                            <td>
+                                <span class="status pending">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M13 7h-2v6l5.25 3.15.75-1.23-4-2.42V7z"></path></svg>
+                                    Pending
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Youssef Ibrahim</td>
@@ -378,7 +380,12 @@
                             <td>Giza</td>
                             <td>Monitor</td>
                             <td>$300</td>
-                            <td><span class="status cancelled"><span class="icon">&#10006;</span> Cancelled</span></td>
+                            <td>
+                                <span class="status cancelled">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                                    Cancelled
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Mariam Hassan</td>
@@ -386,7 +393,12 @@
                             <td>Dakahlia</td>
                             <td>Webcam, Headset</td>
                             <td>$150</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
+                            <td>
+                                <span class="status confirmed">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
+                                    Confirmed
+                                </span>
+                            </td>
                         </tr>
                          <tr>
                             <td>Khaled Mohamed</td>
@@ -394,7 +406,12 @@
                             <td>Cairo</td>
                             <td>USB Hub</td>
                             <td>$25</td>
-                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                            <td>
+                                <span class="status pending">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M13 7h-2v6l5.25 3.15.75-1.23-4-2.42V7z"></path></svg>
+                                    Pending
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Nourhan Said</td>
@@ -402,7 +419,12 @@
                             <td>Sharqia</td>
                             <td>Gaming Chair</td>
                             <td>$220</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
+                            <td>
+                                <span class="status confirmed">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
+                                    Confirmed
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Omar Abdullah</td>
@@ -410,7 +432,12 @@
                             <td>Gharbia</td>
                             <td>Microphone</td>
                             <td>$95</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
+                            <td>
+                                <span class="status confirmed">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
+                                    Confirmed
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Salma Tarek</td>
@@ -418,7 +445,12 @@
                             <td>Aswan</td>
                             <td>External SSD</td>
                             <td>$110</td>
-                            <td><span class="status cancelled"><span class="icon">&#10006;</span> Cancelled</span></td>
+                            <td>
+                                <span class="status cancelled">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                                    Cancelled
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Mahmoud Elsayed</td>
@@ -426,7 +458,12 @@
                             <td>Qalyubia</td>
                             <td>Power Bank</td>
                             <td>$40</td>
-                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                            <td>
+                                <span class="status pending">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M13 7h-2v6l5.25 3.15.75-1.23-4-2.42V7z"></path></svg>
+                                    Pending
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Hana Gamal</td>
@@ -434,7 +471,12 @@
                             <td>Suez</td>
                             <td>Laptop Stand</td>
                             <td>$35</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
+                            <td>
+                                <span class="status confirmed">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
+                                    Confirmed
+                                </span>
+                            </td>
                         </tr>
                          <tr>
                             <td>Amr Diab</td>
@@ -442,7 +484,12 @@
                             <td>Port Said</td>
                             <td>VR Headset</td>
                             <td>$450</td>
-                            <td><span class="status pending"><span class="icon">&#8987;</span> Pending</span></td>
+                            <td>
+                                <span class="status pending">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M13 7h-2v6l5.25 3.15.75-1.23-4-2.42V7z"></path></svg>
+                                    Pending
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Laila Adel</td>
@@ -450,7 +497,12 @@
                             <td>Ismailia</td>
                             <td>Printer</td>
                             <td>$180</td>
-                            <td><span class="status confirmed">Confirmed</span></td>
+                            <td>
+                                <span class="status confirmed">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"></path></svg>
+                                    Confirmed
+                                </span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

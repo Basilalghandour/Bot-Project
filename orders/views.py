@@ -1,13 +1,14 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from.adapters import adapt_incoming_order
 from .models import *
 from .serializers import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
+
 
 
 class BrandViewSet(viewsets.ModelViewSet):
@@ -119,6 +120,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
     
     def list(self, request, *args, **kwargs):
-        return Response({"message": "ok - dashboard"}, status=status.HTTP_200_OK)
+        return render(request, 'dashboard.html')
     
     

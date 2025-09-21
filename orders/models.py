@@ -19,7 +19,11 @@ class Order(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="orders")
     customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="orders", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    forwarded_to_delivery = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20,
+        choices=[("pending", "Pending"), ("confirmed", "Confirmed"), ("cancelled", "Cancelled")],
+        default="pending")
+    confirmed_at = models.DateTimeField(blank=True, null=True)    
 
     def __str__(self):
         return f"Order #{self.id} - {self.customer_name}"

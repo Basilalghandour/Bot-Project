@@ -213,9 +213,9 @@
                               {% endif %}
                             </td>
                             <td>{% if o.customer %}{{ o.customer.phone }}{% else %}-{% endif %}</td>
-                            <td>{% if o.customer %}{{ o.customer.city }}{% else %}-{% endif %}</td>
+                            <td>{% if o.customer %}{{ o.customer.state }}{% else %}-{% endif %}</td>
                             <td>{{ o.external_id|default:o.id }}</td>
-                            <td>${{ o.total|floatformat:2 }}</td>
+                            <td>${{ o.total_price|floatformat:2 }}</td>
                             <td>
                                 <span class="status {% if o.status|lower == 'confirmed' %}confirmed{% elif o.status|lower == 'pending' %}pending{% else %}cancelled{% endif %}">
                                     {% if o.status|lower == 'confirmed' %}

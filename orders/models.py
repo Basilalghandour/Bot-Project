@@ -24,6 +24,11 @@ class Order(models.Model):
         choices=[("pending", "Pending"), ("confirmed", "Confirmed"), ("cancelled", "Cancelled")],
         default="pending")
     confirmed_at = models.DateTimeField(blank=True, null=True)    
+    
+    @property
+    def total_price(self):
+        """Calculates the total price of all items in the order."""
+        return sum(item.price * item.quantity for item in self.items.all())
 
     def __str__(self):
         return f"Order #{self.id} - {self.customer_name}"

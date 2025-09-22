@@ -115,15 +115,15 @@ class ConfirmationViewSet(viewsets.ModelViewSet):
     serializer_class = ConfirmationSerializer
 
 
+# in your views.py file
+
 class DashboardViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     http_method_names = ['get']
 
     def list(self, request, *args, **kwargs):
         # Get webhook_id from URL
-        webhook_id = self.kwargs.get('brand_webhook_id')
-
-        print("webhook_id from URL:", webhook_id)        
+        webhook_id = self.kwargs.get('brand_webhook_id')      
 
         # Find the brand or return 404 if not found
         brand = get_object_or_404(Brand, webhook_id=webhook_id)
@@ -131,10 +131,21 @@ class DashboardViewSet(viewsets.ModelViewSet):
         # Get all orders for this brand
         orders = Order.objects.filter(brand=brand).order_by('-created_at')
 
-        # Pass brand + orders into template
+        # --- ADD THIS SECTION ---
+        # Calculate the metrics from the orders queryset
+        metrics = {
+            'total_orders': orders.count(),
+            'confirmed': orders.filter(status='confirmed').count(),
+            'pending': orders.filter(status='pending').count(),
+            'cancelled': orders.filter(status='cancelled').count(),
+        }
+        # --- END OF NEW SECTION ---
+
+        # Pass brand, orders, and the new metrics into the template context
         context = {
             "brand": brand,
             "orders": orders,
+            "metrics": metrics, # Add the metrics dictionary here
         }
 
         return render(request, "dashboard.html", context)

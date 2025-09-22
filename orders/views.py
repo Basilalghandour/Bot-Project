@@ -118,8 +118,23 @@ class ConfirmationViewSet(viewsets.ModelViewSet):
 class DashboardViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     http_method_names = ['get']
-    
+
     def list(self, request, *args, **kwargs):
-        return render(request, 'dashboard.html')
-    
-    
+        # Get webhook_id from URL
+        webhook_id = self.kwargs.get('brand_webhook_id')
+
+        print("webhook_id from URL:", webhook_id)        
+
+        # Find the brand or return 404 if not found
+        brand = get_object_or_404(Brand, webhook_id=webhook_id)
+
+        # Get all orders for this brand
+        orders = Order.objects.filter(brand=brand).order_by('-created_at')
+
+        # Pass brand + orders into template
+        context = {
+            "brand": brand,
+            "orders": orders,
+        }
+
+        return render(request, "dashboard.html", context)

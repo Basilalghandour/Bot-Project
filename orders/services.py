@@ -6,12 +6,12 @@ from django.conf import settings
 
 def send_whatsapp_confirmation(order):
     """
-    Sends the WhatsApp confirmation message for a given order,
-    including variables for the template.
+    Sends the WhatsApp confirmation message.
+    (This version is for the template with only 2 variables for the brand name).
     """
-    api_token = settings.WHATSAPP_API_TOKEN
-    phone_number_id = settings.WHATSAPP_PHONE_NUMBER_ID
-    template_name = settings.WHATSAPP_TEMPLATE_NAME
+    api_token = settings.WHATSAPP_API_TOKEN #
+    phone_number_id = settings.WHATSAPP_PHONE_NUMBER_ID #
+    template_name = settings.WHATSAPP_TEMPLATE_NAME #
     
     url = f"https://graph.facebook.com/v22.0/{phone_number_id}/messages"
     
@@ -20,9 +20,9 @@ def send_whatsapp_confirmation(order):
         "Content-Type": "application/json",
     }
     
-    customer_phone = re.sub(r'\D', '', order.customer.phone)
+    customer_phone = re.sub(r'\D', '', order.customer.phone) #
     
-    # --- MODIFIED PAYLOAD WITH VARIABLES ---
+    # --- PAYLOAD FOR YOUR CURRENT 2-VARIABLE TEMPLATE ---
     payload = {
         "messaging_product": "whatsapp",
         "to": customer_phone,
@@ -30,10 +30,9 @@ def send_whatsapp_confirmation(order):
         "template": {
             "name": template_name,
             "language": {"code": "en"},
-            # This 'components' block is new. It contains the variables.
             "components": [
                 {
-                    "type": "body", # Or "header" if your variables are in the header
+                    "type": "body",
                     "parameters": [
                         {
                             "type": "text",
@@ -44,12 +43,25 @@ def send_whatsapp_confirmation(order):
                             "text": order.brand.name # This will replace {{2}}
                         }
                     ]
+                },
+                # This section sends the unique Order ID back when a button is clicked
+                {
+                    "type": "button",
+                    "sub_type": "quick_reply",
+                    "index": "0",
+                    "parameters": [{"type": "payload", "payload": f"confirm_order_{order.id}"}] #
+                },
+                {
+                    "type": "button",
+                    "sub_type": "quick_reply",
+                    "index": "1",
+                    "parameters": [{"type": "payload", "payload": f"cancel_order_{order.id}"}] #
                 }
             ]
         }
     }
     
-    print(f"Sending WhatsApp message to {customer_phone} with variables...")
+    print(f"Sending WhatsApp message to {customer_phone} with 2 variables...")
     
     try:
         response = requests.post(url, headers=headers, json=payload)

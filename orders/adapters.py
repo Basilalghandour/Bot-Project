@@ -1,3 +1,5 @@
+# in your adapters.py file
+
 from decimal import Decimal, InvalidOperation
 from .models import Customer
 
@@ -19,10 +21,8 @@ def adapt_shopify_order(data, brand=None):
     customer_data = data.get("customer", {}) or {}
     shipping_address = data.get("shipping_address", {}) or {}
 
-    # 🔹 Email always from customer object
+    # ... (customer and address info remains the same)
     email = customer_data.get("email") or ""
-
-    # 🔹 All other info from shipping address
     first_name = shipping_address.get("first_name") or ""
     last_name = shipping_address.get("last_name") or ""
     phone = shipping_address.get("phone") or ""
@@ -32,18 +32,6 @@ def adapt_shopify_order(data, brand=None):
     state = shipping_address.get("province") or ""
     country = shipping_address.get("country") or ""
     postal_code = shipping_address.get("zip") or None
-
-    # 🔹 Always create a new customer row
-   # Customer.objects.create(
-    #    first_name=first_name,
-     #  email=email,
-     #   phone=phone,
-     #   address=address,
-     #   city=city,
-     #   state=state,
-      #  country=country,
-       # postal_code=postal_code,
-   # )
 
     # Adapt order items
     items = []
@@ -55,6 +43,15 @@ def adapt_shopify_order(data, brand=None):
             "quantity": int(qty),
             "price": str(_to_decimal(price)),
         })
+    
+    # Extract Shipping Cost
+    shipping_lines = data.get("shipping_lines", [])
+    shipping_cost = "0.00"
+    if shipping_lines and isinstance(shipping_lines, list) and shipping_lines[0].get("price"):
+        shipping_cost = shipping_lines[0].get("price")
+        
+    # --- NEW: Extract the final total price ---
+    total_cost = data.get("total_price", "0.00")
 
     adapted = {
         "customer": {
@@ -70,6 +67,8 @@ def adapt_shopify_order(data, brand=None):
             "postal_code": postal_code,
         },
         "items": items,
+        "shipping_cost": str(_to_decimal(shipping_cost)),
+        "total_cost": str(_to_decimal(total_cost)), # Use the pre-calculated total
     }
 
     if "id" in data:
@@ -83,7 +82,7 @@ def adapt_woocommerce_order(data, brand=None):
     shipping = data.get("shipping", {}) or {}
     billing = data.get("billing", {}) or {}
 
-    # Prefer shipping info, fallback to billing
+    # ... (customer and address info remains the same)
     first_name = shipping.get("first_name") or billing.get("first_name") or ""
     last_name = shipping.get("last_name") or billing.get("last_name")  or ""
     email = billing.get("email") or ""
@@ -94,18 +93,12 @@ def adapt_woocommerce_order(data, brand=None):
     state = shipping.get("state") or billing.get("state") or ""
     country = shipping.get("country") or billing.get("country") or ""
     postal_code = shipping.get("postcode") or billing.get("postcode") or None
-
-    # Always create a new customer row
-   # Customer.objects.create(
-    #    first_name=first_name,
-     #   last_name=last_name,
-     #   email=email,
-     #   phone=phone,
-      #  address=address,
-       # state=state,
-       # country=country,
-       # postal_code=postal_code,
-   # )
+    
+    # Extract Shipping Cost
+    shipping_cost = data.get("shipping_total", "0.00")
+    
+    # --- NEW: Extract the final total price ---
+    total_cost = data.get("total", "0.00")
 
     # Adapt order items with unit price
     items = []
@@ -133,6 +126,8 @@ def adapt_woocommerce_order(data, brand=None):
             "postal_code": postal_code,
         },
         "items": items,
+        "shipping_cost": str(_to_decimal(shipping_cost)),
+        "total_cost": str(_to_decimal(total_cost)), # Use the pre-calculated total
     }
 
     if "id" in data:
@@ -140,12 +135,8 @@ def adapt_woocommerce_order(data, brand=None):
 
     return adapted
 
-
+# ... (adapt_incoming_order function is unchanged)
 def adapt_incoming_order(data, brand=None):
-    """
-    Detect payload type and call the correct adapter, returning dict with customer info.
-    Always returns: { customer: {...}, items: [...], external_id: str|None }
-    """
     if isinstance(data, dict):
         if "line_items" in data and "customer" in data:
             return adapt_shopify_order(data, brand)
@@ -157,11 +148,14 @@ def adapt_incoming_order(data, brand=None):
             return {
                 "customer": data.get("customer", {}),
                 "items": data.get("items", []),
-                "external_id": str(data.get("external_id")) if data.get("external_id") else None
+                "external_id": str(data.get("external_id")) if data.get("external_id") else None,
+                "shipping_cost": str(_to_decimal(data.get("shipping_cost", "0.00"))),
+                "total_cost": str(_to_decimal(data.get("total_cost", "0.00"))),
             }
-
     return {
         "customer": data.get("customer", {}),
         "items": [],
-        "external_id": str(data.get("id")) if data.get("id") else None
+        "external_id": str(data.get("id")) if data.get("id") else None,
+        "shipping_cost": "0.00",
+        "total_cost": "0.00",
     }

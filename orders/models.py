@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 import uuid
 
 class Brand(models.Model):
@@ -23,7 +24,10 @@ class Order(models.Model):
         max_length=20,
         choices=[("pending", "Pending"), ("confirmed", "Confirmed"), ("cancelled", "Cancelled")],
         default="pending")
-    confirmed_at = models.DateTimeField(blank=True, null=True)    
+    responded_at = models.DateTimeField(blank=True, null=True)  
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+      
     
     @property
     def total_price(self):

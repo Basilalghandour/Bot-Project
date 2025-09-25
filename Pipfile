@@ -6,9 +6,10 @@ name = "pypi"
 [packages]
 django = "*"
 pymysql = "*"
-djangorestframework = "*"
 drf-nested-routers = "*"
 cryptography = "*"
+djangorestframework = "*"
+requests = "*"
 
 [dev-packages]
 

@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'orders',
+    'orders.apps.OrdersConfig',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +130,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+WHATSAPP_API_TOKEN = 'EAAVmDklUHfEBPos7mZAMBN7nP6dVPo2P8e5IoAuhat93GZAwalwf8hsJv9qUZAYNxuml9dMIHvj7yWZCKmbKKIhrcYZBzHPCZAUvU5CaYwVn7abvJRYbZBFu7wMf0axpZAOKxbrd5KAVPvEoqgrcgRvF4DMP273RQbRI9PrFknElMesF8k9SWpDTGHZB6UvvgPhFjdeTZB4xZAPZAqfZAe9Bu2coItSlgw9lIsuNm67J77eZC79Qzlg9FUQYFE2wQXXQZDZD'
+WHATSAPP_PHONE_NUMBER_ID = '808080232387668' # e.g., 880000232387668
+WHATSAPP_TEMPLATE_NAME = 'test_1' # The name of the template you want to send
